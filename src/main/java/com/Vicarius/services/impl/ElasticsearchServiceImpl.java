@@ -1,6 +1,7 @@
 package com.Vicarius.services.impl;
 
 import com.Vicarius.controllers.advice.exceptions.BookStoreAlreadyExistsException;
+import com.Vicarius.controllers.advice.exceptions.BookStoreBaseException;
 import com.Vicarius.controllers.advice.exceptions.BookStoreNotFoundException;
 import com.Vicarius.controllers.advice.exceptions.BookStoreServerErrorException;
 import com.Vicarius.modules.BookStore;
@@ -46,10 +47,14 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
                 log.error(msg);
                 throw new BookStoreAlreadyExistsException(msg);
             }
+        } catch (BookStoreBaseException ex) {
+            log.error("Failed to create new index", ex);
+            throw ex;
         } catch (Exception ex) {
             log.error("Failed to create new index", ex);
-            throw new BookStoreServerErrorException(ex.getMessage());
+            throw new BookStoreAlreadyExistsException(ex.getMessage());
         }
+
     }
 
     @Override
