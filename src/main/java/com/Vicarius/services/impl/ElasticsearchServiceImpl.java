@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ElasticsearchServiceImpl implements ElasticsearchService {
 
     private final RestClient client;
-    private final String INDEX_NAME = "store";
+    private final String INDEX_NAME = "store_007";
     private final ObjectMapper mapper;
 
     @Autowired
