@@ -34,10 +34,10 @@ public class ElasticsearchControllerImpl implements ElasticsearchController {
     }
 
     @Override
-    public ResponseEntity<BookStore> getDocument(String documentId) {
+    public ResponseEntity<String> getDocument(String documentId) {
         log.info("Received request to get a document");
-        BookStore doc = this.elasticsearchService.getDocument(documentId);
-        log.info("Got document with id: {} successfully", doc.getDocId());
+        String doc = this.elasticsearchService.getDocument(documentId);
+        log.info("Got document: {} successfully", doc);
         return new ResponseEntity<>(doc, HttpStatus.OK);
     }
 }

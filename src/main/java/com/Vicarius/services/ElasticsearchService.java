@@ -8,5 +8,5 @@ public interface ElasticsearchService {
 
     String createDocument();
 
-    BookStore getDocument(String documentId);
+    String getDocument(String documentId);
 }

@@ -38,5 +38,5 @@ public interface ElasticsearchController {
             @ApiResponse(responseCode = "404", description = "Not found - no document", content = {@Content(schema = @Schema(implementation = ErrorResponse.class))}),
             @ApiResponse(responseCode = "500", description = "Server error", content = {@Content(schema = @Schema(implementation = ErrorResponse.class))})})
     @Operation(description = "Endpoint for creating a new document")
-    ResponseEntity<BookStore> getDocument(@PathVariable String documentId);
+    ResponseEntity<String> getDocument(@PathVariable String documentId);
 }

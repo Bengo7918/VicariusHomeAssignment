@@ -1,11 +1,13 @@
 package com.Vicarius.services.impl;
 
+import com.Vicarius.controllers.advice.exceptions.BookStoreAlreadyExistsException;
 import com.Vicarius.controllers.advice.exceptions.BookStoreNotFoundException;
 import com.Vicarius.controllers.advice.exceptions.BookStoreServerErrorException;
 import com.Vicarius.modules.BookStore;
 import com.Vicarius.services.ElasticsearchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,11 +32,19 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
     @Override
     public void createIndex() {
         try {
-            Request request = new Request("PUT", "/" + this.INDEX_NAME);
+            Request checkRequest = new Request("HEAD", "/" + this.INDEX_NAME);
+            Response checkResponse = this.client.performRequest(checkRequest);
+            if (checkResponse.getStatusLine().getStatusCode() == 404) {
+                Request request = new Request("PUT", "/" + this.INDEX_NAME);
 
-            Response response = this.client.performRequest(request);
-            if (response.getStatusLine().getStatusCode() != 200) {
-                throw new BookStoreServerErrorException("Error with creating an index. Status code: " + response.getStatusLine().getStatusCode());
+                Response response = this.client.performRequest(request);
+                if (response.getStatusLine().getStatusCode() != 200) {
+                    throw new BookStoreServerErrorException("Error with creating an index. Status code: " + response.getStatusLine().getStatusCode());
+                }
+            } else {
+                String msg = "Index: " + this.INDEX_NAME + " already exists in elastic";
+                log.error(msg);
+                throw new BookStoreAlreadyExistsException(msg);
             }
         } catch (Exception ex) {
             log.error("Failed to create new index", ex);
@@ -66,16 +76,16 @@ public class ElasticsearchServiceImpl implements ElasticsearchService {
     }
 
     @Override
-    public BookStore getDocument(String documentId) {
+    public String getDocument(String documentId) {
         try {
             Request request = new Request("GET", "/" + this.INDEX_NAME + "/_doc/" + documentId);
 
             Response response = this.client.performRequest(request);
             if (response.getStatusLine().getStatusCode() == 200) {
-                return this.mapper.readValue(response.getEntity().getContent(), BookStore.class);
+                return EntityUtils.toString(response.getEntity());
             } else {
                 String msg = "book store with id: " + documentId + " not found";
-                log.warn(msg);
+                log.error(msg);
                 throw new BookStoreNotFoundException(msg);
             }
         } catch (Exception ex) {
